@@ -1,0 +1,6 @@
+**/.ipynb_checkpoints/
+**/*.swp
+.vscode/
+**/data/
+**/bad_data/
+**/__pycache__/
