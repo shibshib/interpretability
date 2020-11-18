@@ -68,6 +68,7 @@ class Block(nn.Module):
 class RegNet(nn.Module):
     def __init__(self, cfg, num_classes=10):
         super(RegNet, self).__init__()
+        self.final_layer_output = None
         self.cfg = cfg
         self.in_planes = 64
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
@@ -101,11 +102,11 @@ class RegNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
+        self.final_layer_output = out
         out = F.adaptive_avg_pool2d(out, (1, 1))
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
-
 
 def RegNetX_200MF():
     cfg = {

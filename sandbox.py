@@ -42,23 +42,23 @@ class Sandbox():
 
     def __init__(self, hparams):
         # Set up optimizer
-        self.learning_rate = hparams.learning_rate
-        self.criterion = nn.CrossEntropyLoss()
-        self.optimizer = optim.SGD(self.net.parameters(), lr=self.learning_rate,
+        learning_rate = hparams.learning_rate
+        criterion = nn.CrossEntropyLoss()
+        optimizer = optim.SGD(net.parameters(), lr=learning_rate,
                             momentum=0.9, weight_decay=5e-4)
         
-        self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
         
-        if hparams.model in self.models.keys():
-            self.net = self.models.get(hparams.model)
+        if hparams.model in models.keys():
+            net = models.get(hparams.model)
         else:
             raise ModelNotFoundException
         
-        self.ckpt_path = self.ckpt_path + hparams.model + ".torch"
-        self.num_epochs = hparams.num_epochs
-        self.net = self.net.to(self.device)
-        if self.device == 'cuda':
-            self.net = torch.nn.DataParallel(self.net)
+        ckpt_path = ckpt_path + hparams.model + ".torch"
+        num_epochs = hparams.num_epochs
+        net = net.to(device)
+        if device == 'cuda':
+            net = torch.nn.DataParallel(net)
             cudnn.benchmark = True
 
 def prepare_dataset(self):
@@ -75,57 +75,57 @@ def prepare_dataset(self):
         transforms.Normalize((0.4914, 0.4822, 0.4465), (0.2023, 0.1994, 0.2010)),
     ])
 
-    self.trainset = torchvision.datasets.CIFAR10(
+    trainset = torchvision.datasets.CIFAR10(
         root='./data', train=True, download=True, transform=transform_train)
-    self.trainloader = torch.utils.data.DataLoader(
-        self.trainset, batch_size=128, shuffle=True, num_workers=2)
+    trainloader = torch.utils.data.DataLoader(
+        trainset, batch_size=128, shuffle=True, num_workers=2)
 
-    self.testset = torchvision.datasets.CIFAR10(
+    testset = torchvision.datasets.CIFAR10(
         root='./data', train=False, download=True, transform=transform_test)
-    self.testloader = torch.utils.data.DataLoader(
-        self.testset, batch_size=100, shuffle=True, num_workers=2)
+    testloader = torch.utils.data.DataLoader(
+        testset, batch_size=100, shuffle=True, num_workers=2)
 
     
     def train(self, epoch):
-        self.net.train()
+        net.train()
         train_loss = 0
         correct = 0
         total = 0
         log_interval = 10
         
-        for batch_idx, (inputs, targets) in enumerate(self.trainloader):
-            inputs, targets = inputs.to(self.device), targets.to(self.device)
-            self.optimizer.zero_grad()
-            outputs = self.net(inputs)
-            loss = self.criterion(outputs, targets)
+        for batch_idx, (inputs, targets) in enumerate(trainloader):
+            inputs, targets = inputs.to(device), targets.to(device)
+            optimizer.zero_grad()
+            outputs = net(inputs)
+            loss = criterion(outputs, targets)
             loss.backward()
-            self.optimizer.step()
+            optimizer.step()
             train_loss = train_loss + loss.item()
             _, predicted = outputs.max(1)
             total = total + targets.size(0)
             correct = correct + predicted.eq(targets).sum().item()
             processed = ((batch_idx + 1) * 128)
             accuracy = (100.0 * correct) / 128
-            progress = (100. * processed) / len(self.trainset)
+            progress = (100. * processed) / len(trainset)
 
             if (batch_idx + 1) % log_interval == 0: 
                     logger.info('Train Epoch: {} [{}/{} ({:.0f}%)]\tLocal Loss: {:.6f}\t Accuracy: {:.6f}\t', 
-                    epoch, processed, len(self.trainset), progress, train_loss, accuracy)
+                    epoch, processed, len(trainset), progress, train_loss, accuracy)
 
 
     def test(self, epoch):
         global best_acc
-        self.net.eval()
+        net.eval()
         test_loss = 0
         correct = 0
         total = 0
         acc = 0
 
         with torch.no_grad():
-            for _, (inputs, targets) in enumerate(self.testloader):
-                inputs, targets = inputs.to(self.device), targets.to(self.device)
-                outputs = self.net(inputs)
-                loss = self.criterion(outputs, targets)
+            for _, (inputs, targets) in enumerate(testloader):
+                inputs, targets = inputs.to(device), targets.to(device)
+                outputs = net(inputs)
+                loss = criterion(outputs, targets)
 
                 test_loss += loss.item()
                 _, predicted = outputs.max(1)
@@ -133,12 +133,12 @@ def prepare_dataset(self):
                 correct += predicted.eq(targets).sum().item()
                 acc = 100.*correct/total
 
-            logger.info('Test set: Avg. loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(test_loss, correct, len(self.testset), acc))  
+            logger.info('Test set: Avg. loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(test_loss, correct, len(testset), acc))  
 
-            if acc > self.best_acc:
+            if acc > best_acc:
                 print('Saving..')
                 state = {
-                    'net': self.net.state_dict(),
+                    'net': net.state_dict(),
                     'acc': acc,
                     'epoch': epoch,
                 }
@@ -147,13 +147,13 @@ def prepare_dataset(self):
                 
                 logger.info( 'Saving/Serving model: epoch: {}, loss: {}, path: {}', epoch, test_loss, './checkpoint' )
                 torch.save( {'epoch': epoch,
-                            'model_state_dict': self.net.state_dict(),
-                            'optimizer_state_dict': self.optimizer.state_dict(),
-                            'loss': self.loss}, self.ckpt_path)
+                            'model_state_dict': net.state_dict(),
+                            'optimizer_state_dict': optimizer.state_dict(),
+                            'loss': loss}, ckpt_path)
                 best_acc = acc
     
     def train_model(start_epoch):
-        for epoch in range(start_epoch, start_epoch+self.num_epochs):
+        for epoch in range(start_epoch, start_epoch+num_epochs):
             train(epoch)
             test(epoch)
     
