@@ -68,9 +68,9 @@ class Block(nn.Module):
 class RegNet(nn.Module):
     def __init__(self, cfg, num_classes=10):
         super(RegNet, self).__init__()
-        self.final_layer_output = None
         self.cfg = cfg
         self.in_planes = 64
+        self.final_layer_output = None
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
