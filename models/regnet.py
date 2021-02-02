@@ -70,6 +70,7 @@ class RegNet(nn.Module):
         super(RegNet, self).__init__()
         self.cfg = cfg
         self.in_planes = 64
+        self.final_layer_output = None
         self.conv1 = nn.Conv2d(3, 64, kernel_size=3,
                                stride=1, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(64)
@@ -101,11 +102,11 @@ class RegNet(nn.Module):
         out = self.layer2(out)
         out = self.layer3(out)
         out = self.layer4(out)
+        self.final_layer_output = out
         out = F.adaptive_avg_pool2d(out, (1, 1))
         out = out.view(out.size(0), -1)
         out = self.linear(out)
         return out
-
 
 def RegNetX_200MF():
     cfg = {
