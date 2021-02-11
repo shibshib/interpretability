@@ -4,7 +4,6 @@ class CustomDataParallel(nn.Module):
     def __init__(self, model):
         super(CustomDataParallel, self).__init__()
         self.model = nn.DataParallel(model).cuda()
-        print(type(self.model))
 
     def forward(self, *input):
         return self.model(*input)

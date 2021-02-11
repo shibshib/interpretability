@@ -5,3 +5,4 @@
 **/bad_data/
 **/__pycache__/
 **/*.pyc
+**/checkpoints/*
